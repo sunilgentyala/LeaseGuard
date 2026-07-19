@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LeaseGuard — Cryptographic Impact-Bounded Authorization</title>
+<meta name="description" content="A cryptographic authorization lease that bounds cumulative operational damage, not just time, while an infrastructure enforcement point is disconnected from its authorization authority." />
+<meta name="theme-color" content="#050a14" />
+<link rel="canonical" href="https://sunilgentyala.github.io/LeaseGuard/" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%90%3C/text%3E%3C/svg%3E" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="LeaseGuard — Cryptographic Impact-Bounded Authorization" />
+<meta property="og:description" content="A cryptographic authorization lease that bounds cumulative operational damage, not just time, during control-plane partition." />
+<meta property="og:url" content="https://sunilgentyala.github.io/LeaseGuard/" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="LeaseGuard" />
+<meta name="twitter:description" content="Cryptographic impact budgets for disconnected hybrid-infrastructure authorization." />
+
+<style>
+  :root{
+    --bg:#050a14; --bg2:#080f1c; --bg3:#030609; --bg-elev:#0b1424;
+    --border:#132238; --border-soft:#0f2236;
+    --text:#e2e8f0; --text-dim:#94a3b8; --text-faint:#475569;
+    --accent:#38bdf8; --accent2:#a78bfa; --accent3:#0ea5e9;
+    --good:#22c55e; --warn:#fbbf24; --bad:#f87171;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(14,165,233,.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(167,139,250,.10), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent)}
+  code, .mono{font-family:'SFMono-Regular',Consolas,'Courier New',monospace}
+  ::selection{background:rgba(56,189,248,.3)}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(5,10,20,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+  .nav-inner{max-width:1020px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .nav-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;color:#f8fafc;text-decoration:none;flex-shrink:0}
+  .nav-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
+  .nav-links{display:flex;gap:20px;flex-wrap:wrap}
+  .nav-links a{color:var(--text-dim);text-decoration:none;font-size:13px;font-weight:500;transition:color .15s}
+  .nav-links a:hover{color:var(--text)}
+  @media (max-width:700px){ .nav-links{display:none} }
+
+  header{padding:72px 0 56px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+  .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .badge{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);color:var(--text-dim);background:var(--bg2)}
+  .badge.status{color:var(--warn);border-color:#3d2f0a;background:#130f04}
+  .logo-row{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+  .shield{width:54px;height:54px;border-radius:14px;flex-shrink:0;background:linear-gradient(135deg,#0369a1,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:0 8px 24px -6px rgba(3,105,161,.5)}
+  h1{font-size:38px;font-weight:800;letter-spacing:-.6px;color:#f8fafc}
+  .tagline{font-size:15px;color:var(--text-dim);margin-top:5px}
+  .lead{font-size:17px;color:var(--text-dim);max-width:720px;margin-top:24px}
+  .lead b{color:var(--text);font-weight:600}
+  .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .tag{font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:6px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);color:var(--accent)}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:9px;font-size:14px;font-weight:600;text-decoration:none;transition:transform .15s,opacity .15s,border-color .15s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,#0369a1,#6d28d9);color:white;box-shadow:0 6px 18px -6px rgba(3,105,161,.55)}
+  .btn-primary:hover{opacity:.92}
+  .btn-secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{border-color:var(--accent)}
+
+  .hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:44px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .hstat{background:var(--bg2);padding:16px 14px;text-align:center}
+  .hstat-val{font-size:20px;font-weight:800;color:#f8fafc}
+  .hstat-label{font-size:11px;color:var(--text-faint);margin-top:3px}
+  @media (max-width:560px){ .hero-stats{grid-template-columns:repeat(2,1fr)} }
+
+  section{padding:56px 0;border-bottom:1px solid var(--border);scroll-margin-top:64px}
+  section.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+  section.reveal.in{opacity:1;transform:translateY(0)}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+  h2{font-size:22px;font-weight:700;color:#f1f5f9;margin-bottom:8px}
+  .section-sub{color:var(--text-faint);font-size:14px;margin-bottom:26px;max-width:700px}
+
+  .problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:700px){ .problem-grid{grid-template-columns:1fr} }
+  .pcard{background:var(--bg2);border:1px solid var(--border-soft);border-radius:10px;padding:18px}
+  .pcard h3{font-size:14px;color:#f1f5f9;margin-bottom:6px}
+  .pcard p{font-size:13px;color:var(--text-dim)}
+  .pcard.bad{border-left:3px solid var(--bad)}
+  .pcard.good{border-left:3px solid var(--good)}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--bg2);border:1px solid var(--border-soft);border-radius:10px;overflow:hidden}
+  .table-scroll{overflow-x:auto;border-radius:10px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-soft);white-space:nowrap}
+  th{background:var(--bg3);color:var(--text-dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+  tr:last-child td{border-bottom:none}
+  td.hl{color:var(--accent);font-weight:700}
+  td.num{font-family:'SFMono-Regular',Consolas,monospace}
+
+  .flow{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .flow-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .flow-box{background:var(--bg2);border:1px solid var(--border-soft);border-radius:10px;padding:14px 16px;font-size:13px;flex:1;min-width:220px}
+  .flow-box b{color:#f1f5f9;display:block;margin-bottom:4px;font-size:13px}
+  .flow-box span{color:var(--text-faint);font-size:12px}
+  .flow-arrow{color:var(--text-faint);font-size:20px;flex-shrink:0}
+  @media (max-width:700px){ .flow-arrow{transform:rotate(90deg)} }
+
+  pre{background:var(--bg3);border:1px solid var(--border-soft);border-radius:10px;padding:18px;overflow-x:auto;font-size:12.5px;line-height:1.55;color:#cbd5e1}
+  .k{color:var(--accent2)} .s{color:var(--good)} .n{color:var(--warn)}
+
+  .barchart{margin-top:20px}
+  .bar-row{display:grid;grid-template-columns:140px 1fr 90px;align-items:center;gap:12px;margin-bottom:10px;font-size:12.5px}
+  .bar-label{color:var(--text-dim)}
+  .bar-track{background:var(--bg3);border-radius:6px;height:20px;overflow:hidden;border:1px solid var(--border-soft)}
+  .bar-fill{height:100%;border-radius:6px 0 0 6px}
+  .bar-fill.time-bound{background:linear-gradient(90deg,#f87171,#fbbf24)}
+  .bar-fill.leaseguard{background:linear-gradient(90deg,#0ea5e9,#22c55e)}
+  .bar-val{text-align:right;font-family:'SFMono-Regular',Consolas,monospace;color:var(--text-dim)}
+
+  .lim-list{list-style:none}
+  .lim-list li{padding:12px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;color:var(--text-dim);display:flex;gap:10px}
+  .lim-list li:last-child{border-bottom:none}
+  .lim-list li::before{content:"—";color:var(--warn);flex-shrink:0}
+
+  footer{padding:40px 0 60px;text-align:center;color:var(--text-faint);font-size:12.5px}
+  footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand"><span class="dot"></span>LeaseGuard</a>
+    <div class="nav-links">
+      <a href="#problem">Problem</a>
+      <a href="#model">Model</a>
+      <a href="#schema">Lease Schema</a>
+      <a href="#protocol">Protocol</a>
+      <a href="#results">Results</a>
+      <a href="#limitations">Limitations</a>
+      <a href="https://github.com/sunilgentyala/LeaseGuard">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="wrap">
+    <div class="badge-row">
+      <span class="badge status">Research prototype — in preparation</span>
+      <span class="badge">MIT licensed</span>
+      <span class="badge">Python simulator</span>
+    </div>
+    <div class="logo-row">
+      <div class="shield">🔐</div>
+      <div>
+        <h1>LeaseGuard</h1>
+        <div class="tagline">Cryptographic Impact-Bounded Authorization Under Disconnected Hybrid Infrastructure Control Planes</div>
+      </div>
+    </div>
+    <p class="lead">
+      Offline-capable credentials — self-contained OAuth tokens, macaroons, cached workload identities,
+      heartbeat- or epoch-revocable tokens — all bound <b>time</b> or <b>delegation structure</b>.
+      None of them bound <b>cumulative operational damage</b>. LeaseGuard is a cryptographic lease that
+      carries a multi-dimensional impact budget — action count, data volume, object count, financial
+      ceiling, destructive-operation ceiling — enforced against tamper-evident local state, so a stale
+      or revoked-but-unreachable credential can only ever do so much damage, no matter how long the
+      control plane stays partitioned.
+    </p>
+    <div class="tag-row">
+      <span class="tag">Storage arrays</span>
+      <span class="tag">Kubernetes</span>
+      <span class="tag">Hypervisors</span>
+      <span class="tag">Edge / DR sites</span>
+      <span class="tag">Backup appliances</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/sunilgentyala/LeaseGuard">View source →</a>
+      <a class="btn btn-secondary" href="#results">See the headline result</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-val">5</div><div class="hstat-label">Budget dimensions</div></div>
+      <div class="hstat"><div class="hstat-val">8</div><div class="hstat-label">Schemes compared</div></div>
+      <div class="hstat"><div class="hstat-val">1min–24h</div><div class="hstat-label">Partition durations tested</div></div>
+      <div class="hstat"><div class="hstat-val">9/9</div><div class="hstat-label">Correctness tests passing</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="eyebrow">The gap</div>
+    <h2>Time-bounded authorization doesn't bound damage</h2>
+    <p class="section-sub">Ten closest systems were surveyed — ACE-OAuth, macaroons, UCON, SPIFFE/SPIRE, CP-ABE revocation, DPoP, CAEP, epoch-revocable pseudonyms, and two 2026 preprints on agent admission control and offline capability graphs. None combine a cryptographically enforced, multi-dimensional cumulative-impact ceiling with local, tamper-evident consumption state.</p>
+    <div class="problem-grid">
+      <div class="pcard bad">
+        <h3>What every prior scheme bounds</h3>
+        <p>A time window, an epoch, a heartbeat interval, or a delegation chain. Once issued, the credential's remaining authority is whatever is left of that window — not a function of how much has actually been done with it.</p>
+      </div>
+      <div class="pcard good">
+        <h3>What LeaseGuard bounds</h3>
+        <p>Cumulative operational impact — action count, data volume, object count, financial estimate, destructive-op count — tracked against a hardware-sealed local counter, independent of how long the disconnection lasts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="model">
+  <div class="wrap">
+    <div class="eyebrow">Closest-work comparison</div>
+    <h2>No located system bounds cumulative impact</h2>
+    <p class="section-sub">Condensed comparison matrix (full version, with 10 systems and 27 references, in the companion research document).</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>System</th><th>Revocation offline?</th><th>Actions counted?</th><th>Impact bounded?</th><th>Cross-infra?</th></tr>
+      <tr><td>Long-lived bearer token</td><td>No</td><td>No</td><td>No</td><td>N/A</td></tr>
+      <tr><td>ACE-OAuth (RFC 9200/9201)</td><td>No</td><td>No</td><td>No</td><td>Partial (IoT)</td></tr>
+      <tr><td>Macaroons (NDSS 2014)</td><td>No</td><td>No</td><td>No</td><td>Generic</td></tr>
+      <tr><td>UCON<sub>ABC</sub> / UCON+</td><td>Yes, if PDP reachable</td><td>Yes</td><td>Not cryptographic</td><td>Generic model</td></tr>
+      <tr><td>SPIFFE/SPIRE cached SVIDs</td><td>No (cache is stale by design)</td><td>No</td><td>No</td><td>Yes, cloud-native</td></tr>
+      <tr><td>CP-ABE offline-authority revocation</td><td>Post-hoc</td><td>No</td><td>No</td><td>Generic</td></tr>
+      <tr><td>DPoP (RFC 9449)</td><td>N/A</td><td>No</td><td>No</td><td>Generic</td></tr>
+      <tr><td>Shared Signals / CAEP</td><td>No (requires the channel)</td><td>No</td><td>No</td><td>Identity/SaaS</td></tr>
+      <tr><td>Epoch-revocable pseudonyms</td><td>Epoch-bounded</td><td>No</td><td>No</td><td>Edge</td></tr>
+      <tr><td>Vouchsafe (2026)</td><td>Not addressed</td><td>No</td><td>No</td><td>Identity graph</td></tr>
+      <tr><td><b>LeaseGuard</b></td><td class="hl">Bounded, not worked around</td><td class="hl">Yes, multi-dimensional</td><td class="hl">Yes — cryptographic</td><td class="hl">Storage / K8s / hypervisor / edge / DR</td></tr>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section id="schema">
+  <div class="wrap">
+    <div class="eyebrow">The credential</div>
+    <h2>Lease schema</h2>
+    <p class="section-sub">A COSE/JOSE-signed claims set (implemented with ECDSA P-256 in the prototype). The multi-dimensional budget is the field prior schemes don't have.</p>
+    <pre>{
+  <span class="k">"sub"</span>: <span class="s">"workload:backup-agent-07"</span>,
+  <span class="k">"aud"</span>: <span class="s">"storage-array:dc2-array-14"</span>,
+  <span class="k">"policy_hash"</span>: <span class="s">"sha256:9f3a...e21c"</span>,
+  <span class="k">"epoch"</span>: <span class="n">4821</span>,
+  <span class="k">"lease_start"</span>: <span class="s">"2026-07-18T09:00:00Z"</span>,
+  <span class="k">"lease_end"</span>: <span class="s">"2026-07-19T09:00:00Z"</span>,
+  <span class="k">"reconciliation_deadline"</span>: <span class="s">"2026-07-19T09:00:00Z"</span>,
+  <span class="k">"budget"</span>: {
+    <span class="k">"max_actions"</span>: <span class="n">50000</span>,
+    <span class="k">"max_data_bytes"</span>: <span class="n">5497558138880</span>,
+    <span class="k">"max_objects"</span>: <span class="n">200000</span>,
+    <span class="k">"max_financial_impact_usd"</span>: <span class="n">2500</span>,
+    <span class="k">"max_destructive_ops"</span>: <span class="n">3</span>
+  },
+  <span class="k">"op_classes"</span>: [<span class="s">"read"</span>, <span class="s">"snapshot.create"</span>, <span class="s">"volume.provision"</span>, <span class="s">"volume.delete"</span>],
+  <span class="k">"seq_range"</span>: [<span class="n">184203</span>, <span class="n">234203</span>],
+  <span class="k">"device_measurement"</span>: <span class="s">"sha384:tpm-quote-..."</span>,
+  <span class="k">"pop_key"</span>: <span class="s">"cose-key:ES256:..."</span>
+}</pre>
+  </div>
+</section>
+
+<section id="protocol">
+  <div class="wrap">
+    <div class="eyebrow">How it works</div>
+    <h2>Issuance, enforcement, reconciliation</h2>
+    <p class="section-sub">The enforcement point never needs to reach the authority to make a decision — it only needs to reach it eventually, to reconcile.</p>
+    <div class="flow">
+      <div class="flow-row">
+        <div class="flow-box"><b>1. Issuance (connected)</b><span>Authority evaluates policy, signs a lease scoped to one subject/audience/epoch with a bounded impact budget.</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box"><b>2. Local enforcement (any connectivity)</b><span>Enforcement point checks the sealed local counter against every budget dimension before each operation. Reads always remain available.</span></div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-box"><b>3. Emergency procedure</b><span>A destructive operation beyond its ceiling requires local dual-control, never a remote approval that can't arrive during a partition.</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box"><b>4. Reconciliation on reconnect</b><span>Authority verifies counter integrity, resolves forked replicas conservatively (sum, not max), issues the next epoch.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="eyebrow">Real simulator output</div>
+    <h2>Impact after mid-partition revocation, by partition length</h2>
+    <p class="section-sub">Same scripted workload, same revocation event (30s into the partition), run against all 8 schemes. Generated by <code>experiments/run_experiments.py</code> — not hand-picked.</p>
+    <div class="barchart">
+      <div class="bar-row"><div class="bar-label">Bearer / PoP / time-lease @ 24h</div><div class="bar-track"><div class="bar-fill time-bound" style="width:100%"></div></div><div class="bar-val">2,040,839</div></div>
+      <div class="bar-row"><div class="bar-label">Same schemes @ 1h</div><div class="bar-track"><div class="bar-fill time-bound" style="width:4.1%"></div></div><div class="bar-val">84,365</div></div>
+      <div class="bar-row"><div class="bar-label">Same schemes @ 10min</div><div class="bar-track"><div class="bar-fill time-bound" style="width:0.7%"></div></div><div class="bar-val">14,061</div></div>
+      <div class="bar-row"><div class="bar-label"><b>LeaseGuard @ 24h</b></div><div class="bar-track"><div class="bar-fill leaseguard" style="width:0.26%"></div></div><div class="bar-val">5,398</div></div>
+      <div class="bar-row"><div class="bar-label"><b>LeaseGuard @ 1h</b></div><div class="bar-track"><div class="bar-fill leaseguard" style="width:0.26%"></div></div><div class="bar-val">5,365</div></div>
+      <div class="bar-row"><div class="bar-label"><b>LeaseGuard @ 10min</b></div><div class="bar-track"><div class="bar-fill leaseguard" style="width:0.25%"></div></div><div class="bar-val">5,061</div></div>
+    </div>
+    <p class="section-sub" style="margin-top:20px">Time-bounded schemes grow roughly linearly with partition duration once revoked mid-partition — nothing locally bounds them. LeaseGuard plateaus at its authorized budget and stays there, at the cost of dropping to 60.2% availability (read-only) once the 24-hour run exhausts its financial-impact ceiling. The epoch-revocable and heartbeat baselines also stay flatter, but only by giving up far more availability — see the full CSV in the repo for every scheme × duration combination.</p>
+  </div>
+</section>
+
+<section id="limitations">
+  <div class="wrap">
+    <div class="eyebrow">Stated honestly</div>
+    <h2>Limitations</h2>
+    <ul class="lim-list">
+      <li>Local counter rollback is <b>detectable</b> at reconciliation, not cryptographically <b>impossible</b>, without a genuine hardware root of trust (TPM/TEE) — many real storage arrays and hypervisor hosts don't expose one today.</li>
+      <li>Financial-impact and destructive-op weights are policy-authored estimates, not independently verified real-world damage figures.</li>
+      <li>This is a simulator. Production integration with real Kubernetes admission webhooks, VMware/Hyper-V adapters, and storage-array APIs is future work.</li>
+      <li>Emergency-deny-witness suppression over a fully disconnected out-of-band channel is an open problem, not solved by this design.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Research prototype by Sunil Gentyala · MIT License ·
+    <a href="https://github.com/sunilgentyala/LeaseGuard">github.com/sunilgentyala/LeaseGuard</a>
+  </div>
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('section');
+  revealEls.forEach(el => el.classList.add('reveal'));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.08 });
+  revealEls.forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
