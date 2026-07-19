@@ -1,0 +1,16 @@
+[project]
+name = "leaseguard"
+version = "0.1.0"
+description = "Cryptographic impact-bounded authorization leases for disconnected hybrid-infrastructure control planes"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Sunil Gentyala" }]
+requires-python = ">=3.10"
+dependencies = ["cryptography>=42.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
