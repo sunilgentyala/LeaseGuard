@@ -53,6 +53,21 @@ Time-bounded schemes grow unbounded (or near-unbounded) with partition duration.
 - Financial-impact and destructive-op weights are policy-authored estimates, not independently verified real-world damage.
 - This is a simulator. Production integration with real Kubernetes admission webhooks, VMware/Hyper-V adapters, and storage-array APIs is future work.
 
+## How to Cite
+
+If you use LeaseGuard in your research, please cite the software:
+
+```bibtex
+@software{gentyala2026leaseguard,
+  author    = {Gentyala, Sunil},
+  title     = {LeaseGuard},
+  year      = {2026},
+  url       = {https://github.com/sunilgentyala/LeaseGuard}
+}
+```
+
+Machine-readable metadata is in [`CITATION.cff`](CITATION.cff); GitHub shows it under "Cite this repository".
+
 ## License
 
 MIT — see `LICENSE`.
